@@ -1,0 +1,9 @@
+{% extends "main.html" %}
+{% block content %}
+{% for item in list%}
+    <div class="alert alert-dark" role="alert">
+        <h3>{{ item[1][0] }}</h3>
+        <p>Записей - {{ item[0][0] }}</p>
+    </div>
+{% endfor %}
+{% endblock %}

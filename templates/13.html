@@ -1,0 +1,42 @@
+{% extends "main.html" %}
+{% block content %}
+
+{% if "username" in session %}
+        <div class="navbar navbar-brand">
+            Мои новости
+            <a style="position: fixed; right: 10px; " href="/logout">{{session['username']}}</a>
+        </div>
+
+{% endif %}
+
+
+{% for item in data %}
+    <div class="alert alert-dark" role="alert">
+        <a href="/news/{{item[0]}}">{{item[1]}}</a>
+    </div>
+{% endfor %}
+{% if add %}
+<form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.title.label }}<br>
+            {{ form.title }}<br>
+            {% for error in form.title.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.text.label }}<br>
+            {{ form.text }}<br>
+            {% for error in form.text.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endif %}
+{% endblock %}

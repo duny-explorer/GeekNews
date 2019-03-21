@@ -1,0 +1,8 @@
+{% extends "main.html" %}
+{% block content %}
+
+<a href="/news">Вернуться к списку новостей</a>
+<h1>{{ news[1] }}</h1>
+<p>{{ news[2] }}</p>
+<a href="/delete_news/{{ news[0] }}">Удалить</a>
+{% endblock %}
