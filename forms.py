@@ -1,12 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, PasswordField, SelectField
+from wtforms import StringField, SubmitField, TextAreaField, PasswordField, SelectField, FileField
 from wtforms.validators import DataRequired
-
-
-class AddSolutionForm(FlaskForm):
-    task = StringField('Задача', validators=[DataRequired()])
-    code = TextAreaField('Код', validators=[DataRequired()])
-    submit = SubmitField('Отправить')
 
 
 class LoginForm(FlaskForm):
@@ -22,13 +16,8 @@ class RegistrationForm(FlaskForm):
     password = StringField('Пароль', validators=[DataRequired()])
     email = StringField('Почта', validators=[DataRequired()])
     telephone = StringField('Телефон', validators=[DataRequired()])
+    file = FileField()
     submit = SubmitField('Зарегистрироваться')
-
-
-class StatusPreviewForm(FlaskForm):
-    status = SelectField("Статус", choices=[("На проверке", "На проверке"), ("Зачтено", "Зачтено"), ("На доработке",
-                                                                                                     "На доработке")])
-    submit = SubmitField('Изменить')
 
 
 class AddNewsForm(FlaskForm):

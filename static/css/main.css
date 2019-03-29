@@ -1,0 +1,14 @@
+.navbar{
+ background: #151719;
+}
+.nav-link{
+ margin-right: 1em !important;
+ color: #f5f5f5
+}
+.nav-link:hover{
+ background: #151719;
+ color: #f97300;
+}
+.navbar-toggler{
+  background: #151719 !important;
+}

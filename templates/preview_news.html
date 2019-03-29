@@ -2,7 +2,7 @@
 {% block content %}
 
 <a href="/news">Вернуться к списку новостей</a>
-<h1>{{ news[1] }}</h1>
-<p>{{ news[2] }}</p>
-<a href="/delete_news/{{ news[0] }}">Удалить</a>
+<h1>{{ news.title }}</h1>
+<p>{{ news.text }}</p>
+<a href="/delete_news/{{ news.id }}">Удалить</a>
 {% endblock %}

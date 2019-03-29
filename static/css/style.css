@@ -51,6 +51,7 @@ input {
 p {
   line-height: 1.5em;
   font-family: 'Open Sans', Arial, sans-serif;
+  color: white;
 }
 
 .clearfix {
@@ -104,6 +105,10 @@ p {
   margin-bottom: 1em;
   padding: 0 16px;
   width: 230px;
+}
+
+#login form input[type="file"] {
+  color: #eee
 }
 
 #login form input[type="submit"] {

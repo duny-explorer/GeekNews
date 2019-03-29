@@ -6,9 +6,7 @@ from DBManager import *
 from forms import *
 
 
-app = Flask(__name__)
 api = Api(app)
-db = DB()
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
@@ -60,11 +58,11 @@ def login():
     elif request.method == "POST":
         user_name = form.username.data
         password = form.password.data
-        exists = UserModel(db.get_connection()).exists(user_name, password)
+        user = DBUsers.query.filter_by(username=user_name, password=password).first()
 
-        if exists[0]:
+        if not (user is None):
             session['username'] = user_name
-            session['user_id'] = exists[1]
+            session['user_id'] = user.id
             return redirect("/news")
         else:
             return redirect("/login")
@@ -90,21 +88,11 @@ class News(Resource):
     def get(self, news_id):
         if 'username' not in session:
             return redirect('/login')
-        news = NewsModel(db.get_connection())
-        abort_if_news_not_found(news_id, news)
-        return make_response(render_template("preview_news.html", news=news.get(news_id)))
+        return make_response(render_template("preview_news.html", news=DBNews.query.get(news_id)))
 
     def delete(self, news_id):
-        news = NewsModel(db.get_connection())
-        abort_if_news_not_found(news_id, news)
-        news.delete(news_id)
-        return jsonify({'success': 'OK'})
-    
-    def put(self, news_id):
-        news = NewsModel(db.get_connection())
-        abort_if_news_not_found(news_id, news)
-        args = parser_put.parse_args()
-        news.update(news_id, args['part'], args['text'])
+        db.session.delete(DBNews.query.get(news_id))
+        db.session.commit()
         return jsonify({'success': 'OK'})
 
 
@@ -113,16 +101,22 @@ class NewsList(Resource):
         if 'username' not in session:
             return redirect('/login')
         global news
-        news = NewsModel(db.get_connection()).get_all(int(session["user_id"]))
+
+        news = DBNews.query.filter_by(user_id=session["user_id"]).all()
         form = AddNewsForm()
         return make_response(render_template("13.html", data=news, form=form, add=True))
 
     def post(self):
-        #  args = parser.parse_args()
         form = AddNewsForm()
 
         if form.validate_on_submit():
-            NewsModel(db.get_connection()).insert(form.title.data, form.text.data, session['user_id'])
+            user = DBUsers.query.get(session['user_id'])
+            user.News.append(DBNews(
+                title=form.title.data,
+                text=form.text.data,
+            ))
+
+            db.session.commit()
             return redirect("/news")
 
         return make_response(render_template("13.html", data=news, form=form, add=True))
@@ -130,42 +124,39 @@ class NewsList(Resource):
 
 class User(Resource):
     def get(self, user_id):
-        user = UserModel(db.get_connection())
-        abort_if_news_not_found(user_id, user)
-        return jsonify({'users': user.get(user_id)})
+        user = DBUsers.query.get(user_id)
+        return jsonify({'users': user})
 
     def delete(self, user_id):
-        user = UserModel(db.get_connection())
-        abort_if_news_not_found(user_id, user)
-        user.delete(user_id)
-        return jsonify({'success': 'OK'})
-    
-    def put(self, user_id):
-        user = UserModel(db.get_connection())
-        abort_if_news_not_found(user_id, user)
-        args = parser_put.parse_args()
-        user.update(user_id, args['part'], args['text'])
+        DBUsers.query.get(user_id).delete()
+        db.session.commit()
         return jsonify({'success': 'OK'})
 
 
 class UserList(Resource):
     def get(self):
-        user = UserModel(db.get_connection()).get_all()
-        return make_response(render_template("13.html", data=user, add=False))
+        return make_response(render_template("13.html", data=DBUsers.query.all(), add=False))
 
     def post(self):
         form = RegistrationForm()
-        user_name = form.username.data
-        password = form.password.data
-        exists = UserModel(db.get_connection()).exists(user_name, password)
+        try:
+            username = form.username.data
+            db.session.add(DBUsers(
+                username=username,
+                password=form.password.data,
+                name=form.name.data,
+                email=form.email.data,
+                surname=form.surname.data,
+                telephone=form.telephone.data
+            ))
 
-        if exists[0]:
+            db.session.commit()
+            print(username)
+            session["username"] = username
+            session["user_id"] = DBUsers.query.filter_by(username=username).first().id
+        except Exception as e:
+            print(e)
             return "Такой пользователь уже сущесвует"
-        else:
-            UserModel(db.get_connection()).insert(user_name, password)
-            session['username'] = user_name
-            session['user_id'] = UserModel(db.get_connection()).exists(user_name, password)[1]
-            return redirect("/news")
 
 
 if __name__ == '__main__':

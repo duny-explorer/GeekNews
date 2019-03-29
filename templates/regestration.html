@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 
 {% block content %}
-<link rel="stylesheet" href="static/css/style_login.css">
+<link rel="stylesheet" href="static/css/style.css">
     <div id="clouds">
 	<div class="cloud x1"></div>
 	<!-- Time for multiple clouds to dance around -->
@@ -16,7 +16,7 @@
 
       <div id="login">
 
-        <form method="post">
+        <form method="post", enctype="multipart/form-data">
 
           <fieldset class="clearfix">
               <p>{{ form.name.label }}</p>
@@ -40,11 +40,14 @@
           <p><span class="fontawesome-lock"></span>
             {{ form.password }}<br>
         </p>
+              {{ form.file }}
             <p>{{ form.submit }}</p>
+
 
           </fieldset>
 
         </form>
+
 
       </div> <!-- end login -->
 
