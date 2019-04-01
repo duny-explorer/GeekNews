@@ -81,7 +81,10 @@ def add_user():
     if request.method == "GET":
         return render_template('regestration.html', form=form)
     elif request.method == "POST":
-        return redirect('/users', code=307)
+        print(form.errors, form)
+        if form.validate_on_submit():
+            return redirect('/users', code=307)
+        return render_template('regestration.html', form=form)
 
 
 class News(Resource):
@@ -102,9 +105,9 @@ class NewsList(Resource):
             return redirect('/login')
         global news
 
-        news = DBNews.query.filter_by(user_id=session["user_id"]).all()
+        news = DBNews.query.all()
         form = AddNewsForm()
-        return make_response(render_template("13.html", data=news, form=form, add=True))
+        return make_response(render_template("news.html", data=news, form=form, add=True, len=len(news)))
 
     def post(self):
         form = AddNewsForm()
@@ -119,7 +122,7 @@ class NewsList(Resource):
             db.session.commit()
             return redirect("/news")
 
-        return make_response(render_template("13.html", data=news, form=form, add=True))
+        return make_response(render_template("news.html", data=news, form=form, add=True, len=len(news)))
 
 
 class User(Resource):
@@ -135,28 +138,24 @@ class User(Resource):
 
 class UserList(Resource):
     def get(self):
-        return make_response(render_template("13.html", data=DBUsers.query.all(), add=False))
+        return make_response(render_template("news.html", data=DBUsers.query.all(), add=False))
 
     def post(self):
         form = RegistrationForm()
-        try:
-            username = form.username.data
-            db.session.add(DBUsers(
+        username = form.username.data
+        db.session.add(DBUsers(
                 username=username,
                 password=form.password.data,
                 name=form.name.data,
                 email=form.email.data,
                 surname=form.surname.data,
-                telephone=form.telephone.data
-            ))
+        ))
 
-            db.session.commit()
-            print(username)
-            session["username"] = username
-            session["user_id"] = DBUsers.query.filter_by(username=username).first().id
-        except Exception as e:
-            print(e)
-            return "Такой пользователь уже сущесвует"
+        db.session.commit()
+        session["username"] = username
+        session["user_id"] = DBUsers.query.filter_by(username=username).first().id
+
+        return redirect("/news")
 
 
 if __name__ == '__main__':

@@ -1,8 +1,14 @@
 {% extends "main.html" %}
-{% block content %}
+{% block content2 %}
+<div class="card">
+    <div class="card-header">
+        <a role="button" class="close xl" aria-label="Close" href="/news"><span aria-hidden="true">&times;</span></a>
+        <h1>{{ news.title }}</h1>
+    </div>
+    <div class="card-body">
+        <p>{{ news.text }}</p>
+        <a href="/delete_news/{{ news.id }}">Удалить</a>
+    </div>
+</div>
 
-<a href="/news">Вернуться к списку новостей</a>
-<h1>{{ news.title }}</h1>
-<p>{{ news.text }}</p>
-<a href="/delete_news/{{ news.id }}">Удалить</a>
 {% endblock %}

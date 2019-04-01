@@ -1,4 +1,4 @@
-.navbar{
+.navbar-dark{
  background: #151719;
 }
 .nav-link{
@@ -7,8 +7,19 @@
 }
 .nav-link:hover{
  background: #151719;
- color: #f97300;
+ color: #228b22;
 }
-.navbar-toggler{
-  background: #151719 !important;
+
+.card-deck {
+margin: 20px;
 }
+
+@font-face {
+    font-family: "Glyphicons Halflings";
+    src: url("../fonts/glyphicons-halflings-regular.eot");
+    src: url("../fonts/glyphicons-halflings-regular.eot?#iefix") format("embedded-opentype"), url("../fonts/glyphicons-halflings-regular.woff2") format("woff2"), url("../fonts/glyphicons-halflings-regular.woff") format("woff"), url("../fonts/glyphicons-halflings-regular.ttf") format("truetype"), url("../fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular") format("svg");
+  }
+
+.glyphicon-align-right:before {
+    content: "\e054";
+  }

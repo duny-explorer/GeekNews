@@ -1,7 +1,9 @@
-{% extends "main.html" %}
+{% extends "base.html" %}
 
 {% block content %}
-<link rel="stylesheet" href="static/css/style.css">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="static/css/login_reg.css">
+
     <div id="clouds">
 	<div class="cloud x1"></div>
 	<!-- Time for multiple clouds to dance around -->
@@ -10,37 +12,57 @@
 	<div class="cloud x4"></div>
 	<div class="cloud x5"></div>
 </div>
-
- <div class="container">
-
-
+ <div class="contain">
       <div id="login">
-
         <form method="post", enctype="multipart/form-data">
-
           <fieldset class="clearfix">
+              {{ form.hidden_tag() }}
               <p>{{ form.name.label }}</p>
               <p><span class="fontawesome-edit"></span>
               {{ form.name }}</p>
+              {% for error in form.name.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
               <p>{{ form.surname.label }}</p>
               <p><span class="fontawesome-group"></span>
               {{ form.surname }}</p>
+              {% for error in form.surname.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
               <p>{{ form.email.label }}</p>
               <p><span class="fontawesome-envelope"></span>
               {{ form.email}}</p>
-              <p>{{ form.telephone.label }}</p>
-              <p><span class="fontawesome-phone-sign"></span>
-            {{ form.telephone }}<br>
-              </p>
+              {% for error in form.email.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
               <p>{{ form.username.label }}</p>
               <p><span class="fontawesome-user"></span>
             {{ form.username }}<br>
               </p>
+               {% for error in form.username.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
               <p>{{ form.password.label }}</p>
           <p><span class="fontawesome-lock"></span>
             {{ form.password }}<br>
         </p>
-              {{ form.file }}
+{% for error in form.password.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+              <p>{{ form.confirm.label }}</p>
+              <p><span class="fontawesome-lock"></span>
+            {{ form.confirm }}<br>
+              </p>
             <p>{{ form.submit }}</p>
 
 

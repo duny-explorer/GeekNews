@@ -1,4 +1,4 @@
-import sqlite3
+import datetime
 
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
@@ -13,11 +13,10 @@ db = SQLAlchemy(app)
 class DBUsers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(30), unique=True, nullable=False)
+    password = db.Column(db.String(30), unique=False, nullable=False)
     name = db.Column(db.String(20), unique=False, nullable=False)
     surname = db.Column(db.String(50), unique=False, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    telephone = db.Column(db.String(11), unique=False, nullable=False)
 
     def __repr__(self):
         return '<User {} {} {} {}>'.format(
@@ -30,6 +29,7 @@ class DBNews(db.Model):
     text = db.Column(db.String(500), unique=False, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('db_users.id'), nullable=False)
     user = db.relationship('DBUsers', backref=db.backref('News', lazy=True))
+    created_date = db.Column(db.String(50), default=datetime.datetime.today().strftime("%d.%m.%Y  %H:%M"))
 
     def __repr__(self):
         return '<News {} {} {}>'.format(
