@@ -1,4 +1,5 @@
 {% extends "main.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
 {% block content2 %}
 <div class="card">
     <div class="card-header">
@@ -7,8 +8,39 @@
     </div>
     <div class="card-body">
         <p>{{ news.text }}</p>
+        {% if session["user_id"] == 1 %}
         <a href="/delete_news/{{ news.id }}">Удалить</a>
+        {% else %}
+        <a>Бан</a>
+        {% endif %}
     </div>
 </div>
+<table class="table table-hover">
+    {% for i in comments %}
+    <tr style="background_color: grey">
+        <td width="70px">
+            <a href="/users/{{ i.user_id }}">
+                <img  style="border-radius: 50px;" width="40" height="40" src="/static/1.jpg" />
+            </a>
+        </td>
+        <td>
+            <a href="/users/{{ i.user_id }}">
+                {{ i.user.username }}
+            </a>
+            <p>{{ i.text }}</p>
+            <smal>{{ i.created_date }}</smal>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<h4 style="margin: 20px">Добавить комментарий</h4>
+<form action="" method="post" novalidate>
+    <div class="form-group">
+        {{ form. hidden_tag () }}
+        {{ wtf.quick_form(form) }}
+
+        {{  wtf.form_errors (form ,  hiddens = "only" )  }}
+    </div>
+    </form>
 
 {% endblock %}

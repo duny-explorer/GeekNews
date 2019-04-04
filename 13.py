@@ -1,27 +1,25 @@
-from flask_restful import reqparse, Api, Resource
-from flask import Flask, jsonify, make_response, render_template, request, session
-from requests import delete
+import random
+
+import post as post
+from flask_restful import Api, Resource, reqparse
+from flask import jsonify, make_response, render_template, request, session
+from requests import delete, post
 from werkzeug.utils import redirect
 from DBManager import *
 from forms import *
+from flask_bootstrap import Bootstrap
 
 
 api = Api(app)
+bootstrap = Bootstrap(app)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
 parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
-parser.add_argument('content', required=True)
+parser.add_argument('text', required=True)
 parser.add_argument('user_id', required=True, type=int)
-
-parser_put = reqparse.RequestParser()
-parser_put.add_argument('part', required=True)
-parser_put.add_argument('text', required=True)
-
-parser_new_user = reqparse.RequestParser()
-parser_new_user.add_argument('login', required=True)
-parser_new_user.add_argument('password', required=True)
+parser.add_argument('theme', required=True)
 
 
 class Error404(Exception):
@@ -38,9 +36,8 @@ def not_found(error):
     return make_response(render_template("error404.html"), 404)
 
 
-def abort_if_news_not_found(news_id, data_base):
-    if not data_base.get(news_id):
-        print(89)
+def abort_if_not_found(data_base, item_id) :
+    if not data_base.query.get(item_id):
         raise Error404
 
 
@@ -48,6 +45,23 @@ def abort_if_news_not_found(news_id, data_base):
 def delete_news(news_id):
     delete('http://localhost:8080/news/{}'.format(news_id))
     return redirect("/news")
+
+
+@app.route('/add_news', methods=["GET", "POST"])
+def add_news():
+    form = AddNewsForm()
+    if request.method == "GET":
+        return render_template('add_news.html', form=form)
+    elif request.method == "POST":
+        if form.validate_on_submit():
+            post("http://localhost:8080/news", json={"title": form.title.data,
+                                                     "text": form.text.data,
+                                                     "user_id": session["user_id"],
+                                                     "theme": form.theme.data})
+
+            return redirect("/news")
+
+        return render_template('add_news.html', form=form)
 
 
 @app.route('/login', methods=["GET", "POST"])
@@ -81,7 +95,6 @@ def add_user():
     if request.method == "GET":
         return render_template('regestration.html', form=form)
     elif request.method == "POST":
-        print(form.errors, form)
         if form.validate_on_submit():
             return redirect('/users', code=307)
         return render_template('regestration.html', form=form)
@@ -89,14 +102,36 @@ def add_user():
 
 class News(Resource):
     def get(self, news_id):
+        abort_if_not_found(DBNews, news_id)
+        form = AddComments()
+
         if 'username' not in session:
             return redirect('/login')
-        return make_response(render_template("preview_news.html", news=DBNews.query.get(news_id)))
+
+        return make_response(render_template("preview_news.html", news=DBNews.query.get(news_id), form=form,
+                             comments=Comments.query.filter_by(news_id=news_id).all()))
 
     def delete(self, news_id):
+        abort_if_not_found(DBNews, news_id)
         db.session.delete(DBNews.query.get(news_id))
         db.session.commit()
         return jsonify({'success': 'OK'})
+
+    def post(self, news_id):
+        abort_if_not_found(DBNews, news_id)
+        form = AddComments()
+        if form.validate_on_submit():
+            user = DBUsers.query.get(session['user_id'])
+            comment = Comments(text=form.text.data, news_id=news_id)
+
+            user.News1.append(comment)
+
+            db.session.commit()
+            return make_response(render_template("preview_news.html", news=DBNews.query.get(news_id), form=form),
+                                 comments=Comments.query.filter_by(news_id=news_id).all())
+
+        return make_response(render_template("preview_news.html", news=DBNews.query.get(news_id), form=form),
+                             comments=Comments.query.filter_by(news_id=news_id).all())
 
 
 class NewsList(Resource):
@@ -106,29 +141,29 @@ class NewsList(Resource):
         global news
 
         news = DBNews.query.all()
-        form = AddNewsForm()
-        return make_response(render_template("news.html", data=news, form=form, add=True, len=len(news)))
+        science_news = random.choice(DBNews.query.filter_by(theme="Наука").all())
+        game_news = random.choice(DBNews.query.filter_by(theme="Игры").all())
+        technology_news = random.choice(DBNews.query.filter_by(theme="Технологии").all())
+        return make_response(render_template("news.html", data=news, len=len(news), science_news=science_news.id,
+                             game_news=game_news.id, technology_news=technology_news.id))
 
     def post(self):
-        form = AddNewsForm()
-
-        if form.validate_on_submit():
-            user = DBUsers.query.get(session['user_id'])
-            user.News.append(DBNews(
-                title=form.title.data,
-                text=form.text.data,
+        args = parser.parse_args()
+        user = DBUsers.query.get(args["user_id"])
+        user.News.append(DBNews(
+                title=args["title"],
+                text=args["text"],
+                theme=args["theme"]
             ))
 
-            db.session.commit()
-            return redirect("/news")
-
-        return make_response(render_template("news.html", data=news, form=form, add=True, len=len(news)))
+        db.session.commit()
+        return True
 
 
 class User(Resource):
     def get(self, user_id):
         user = DBUsers.query.get(user_id)
-        return jsonify({'users': user})
+        return make_response(render_template("preview_users.html", user=user))
 
     def delete(self, user_id):
         DBUsers.query.get(user_id).delete()
@@ -138,7 +173,7 @@ class User(Resource):
 
 class UserList(Resource):
     def get(self):
-        return make_response(render_template("news.html", data=DBUsers.query.all(), add=False))
+        return make_response(render_template("users.html", data=DBUsers.query.all()))
 
     def post(self):
         form = RegistrationForm()

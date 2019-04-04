@@ -14,7 +14,7 @@
         <img src="static/head.png" class="d-block w-100" alt="...">
         <div class="carousel-caption d-none d-md-block">
           <h5>#О_науке</h5>
-            <a role="button" class="btn btn-outline-success btn-lg">Читать</a>
+            <a role="button" class="btn btn-outline-success btn-lg" href="/news/{{ science_news }}">Читать</a>
         </div>
       </div>
 
@@ -22,14 +22,14 @@
         <img src="static/head1.jfif" class="d-block w-100" alt="...">
         <div class="carousel-caption d-none d-md-block">
           <h5>#О_играх</h5>
-            <a role="button" class="btn btn-outline-success btn-lg">Читать</a>
+            <a role="button" class="btn btn-outline-success btn-lg" href="/news/{{ game_news }}">Читать</a>
         </div>
       </div>
       <div class="carousel-item">
         <img src="static/head.jpg" class="d-block w-100" alt="...">
         <div class="carousel-caption d-none d-md-block">
           <h5>#О_технологиях</h5>
-            <a role="button" class="btn btn-outline-success btn-lg">Читать</a>
+            <a role="button" class="btn btn-outline-success btn-lg" href="/news/{{ technology_news }}">Читать</a>
         </div>
       </div>
     </div>
@@ -58,7 +58,7 @@
              <a role="button" class="btn btn-outline-success btn-lg" href="/news/{{data[item + i].id}}">Читать</a>
         </div>
         <div class="card-footer text-muted">
-            Время добавления: {{ data[item + i].created_date }}
+            <small>Время добавления: {{ data[item + i].created_date }}</small>
         </div>
     </div>
     {% endif %}
@@ -66,29 +66,4 @@
 </div>
     {% endfor %}
 
-
-{% if add %}
-<form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <p>
-            {{ form.title.label }}<br>
-            {{ form.title }}<br>
-            {% for error in form.title.errors %}
-                <div class="alert alert-danger" role="alert">
-                    {{ error }}
-                </div>
-            {% endfor %}
-        </p>
-        <p>
-            {{ form.text.label }}<br>
-            {{ form.text }}<br>
-            {% for error in form.text.errors %}
-                <div class="alert alert-danger" role="alert">
-                    {{ error }}
-                </div>
-            {% endfor %}
-        </p>
-        <p>{{ form.submit() }}</p>
-    </form>
-{% endif %}
 {% endblock %}
