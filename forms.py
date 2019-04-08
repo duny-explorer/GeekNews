@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, TextAreaField, PasswordField, FileField, SelectField
+from wtforms import StringField, SubmitField, TextAreaField, PasswordField, FileField, SelectField, RadioField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 from DBManager import *
 
@@ -53,3 +53,10 @@ class AddNewsForm(FlaskForm):
 class AddComments(FlaskForm):
     text = TextAreaField('', validators=[DataRequired()])
     submit = SubmitField('Добавить')
+
+
+class AddVan(FlaskForm):
+    choice = RadioField(choices=[("Неприемливый материал", "Неприемливый материал"), ("Неправда", "Неправда"),
+                                 ("Просто автор не нравится", "Просто автор не нравится")],
+                        default=1)
+    submit = SubmitField('Отправить запрос')

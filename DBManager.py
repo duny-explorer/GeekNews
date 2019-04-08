@@ -17,7 +17,7 @@ class DBUsers(db.Model):
     name = db.Column(db.String(20), unique=False, nullable=False)
     surname = db.Column(db.String(50), unique=False, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    image = db.Column(db.String(20), unique=True, nullable=False, default="1.jpg")
+    image = db.Column(db.String(20), unique=False, nullable=False, default="1.jpg")
 
     def __repr__(self):
         return '<User {} {} {} {}>'.format(
@@ -49,6 +49,13 @@ class Comments(db.Model):
     def __repr__(self):
         return '<Comment {} {} {}>'.format(
             self.id, self.user_id, self.news_id)
+
+
+class DBVan(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    news_id = db.Column(db.Integer, db.ForeignKey('db_news.id'), nullable=False)
+    user = db.relationship('DBNews', backref=db.backref('Users', lazy=True))
+    choice = db.Column(db.String(18), unique=False, nullable=False)
 
 
 db.create_all()

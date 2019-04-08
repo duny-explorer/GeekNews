@@ -103,13 +103,14 @@ def add_user():
 class News(Resource):
     def get(self, news_id):
         abort_if_not_found(DBNews, news_id)
-        form = AddComments()
+        form = AddComments(prefix="form1")
+        form_van = AddVan(prefix="form2")
 
         if 'username' not in session:
             return redirect('/login')
 
         return make_response(render_template("preview_news.html", news=DBNews.query.get(news_id), form=form,
-                             comments=Comments.query.filter_by(news_id=news_id).all()))
+                             comments=Comments.query.filter_by(news_id=news_id).all(), form_van=form_van))
 
     def delete(self, news_id):
         abort_if_not_found(DBNews, news_id)
@@ -119,16 +120,19 @@ class News(Resource):
 
     def post(self, news_id):
         abort_if_not_found(DBNews, news_id)
-        form = AddComments()
-        if form.validate_on_submit():
+        form = AddComments(prefix="form1")
+        form_van = AddVan(prefix="form2")
+        if form.validate_on_submit() and form.submit.data:
             user = DBUsers.query.get(session['user_id'])
             comment = Comments(text=form.text.data, news_id=news_id)
 
             user.News1.append(comment)
 
             db.session.commit()
-            return make_response(render_template("preview_news.html", news=DBNews.query.get(news_id), form=form),
-                                 comments=Comments.query.filter_by(news_id=news_id).all())
+            return make_response(render_template("preview_news.html", news=DBNews.query.get(news_id), form=form,
+                                 comments=Comments.query.filter_by(news_id=news_id).all(), form_van=form_van))
+        elif form_van.submit.data:
+            return redirect('/news')
 
         return make_response(render_template("preview_news.html", news=DBNews.query.get(news_id), form=form),
                              comments=Comments.query.filter_by(news_id=news_id).all())
@@ -191,6 +195,22 @@ class UserList(Resource):
         session["user_id"] = DBUsers.query.filter_by(username=username).first().id
 
         return redirect("/news")
+
+
+class Van(Resource):
+    def get(self, van_id):
+        return
+
+    def delete(self, van_id):
+        return
+
+
+class VanList(Resource):
+    def get(self):
+        return
+
+    def post(self):
+        return
 
 
 if __name__ == '__main__':
