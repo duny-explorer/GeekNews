@@ -54,7 +54,7 @@ class Comments(db.Model):
 class DBVan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     news_id = db.Column(db.Integer, db.ForeignKey('db_news.id'), nullable=False)
-    user = db.relationship('DBNews', backref=db.backref('Users', lazy=True))
+    news = db.relationship('DBNews', backref=db.backref('Users', lazy=True))
     choice = db.Column(db.String(18), unique=False, nullable=False)
 
 

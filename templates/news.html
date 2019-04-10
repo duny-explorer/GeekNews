@@ -59,7 +59,8 @@
              <a role="button" class="btn btn-outline-success btn-lg" href="/news/{{data[item + i].id}}">Читать</a>
         </div>
         <div class="card-footer text-muted">
-            <small>Время добавления: {{ data[item + i].created_date }}</small>
+            <small class="d-inline">Время добавления: {{ data[item + i].created_date }}</small>
+            <a class="d-inline float-right" href="\users\{{ data[item + i].user.id }}">{{data[item + i].user.username}} <img style="border-radius: 50px;" src="/static/1.jpg" width="40" height="40"></a>
         </div>
     </div>
     {% endif %}

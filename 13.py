@@ -21,6 +21,10 @@ parser.add_argument('text', required=True)
 parser.add_argument('user_id', required=True, type=int)
 parser.add_argument('theme', required=True)
 
+parser_2 = reqparse.RequestParser()
+parser_2.add_argument('news_id', required=True, type=int)
+parser_2.add_argument('choice', required=True)
+
 
 class Error404(Exception):
     pass
@@ -89,6 +93,16 @@ def logout():
     return redirect('/login')
 
 
+@app.route('/delete_van/<int:van_id>/<int:news_id>')
+def delete_van(van_id, news_id):
+    delete('http://localhost:8080/admin/{}'.format(van_id))
+
+    if news_id != 0:
+        delete('http://localhost:8080/news/{}'.format(news_id))
+
+    return redirect('/admin')
+
+
 @app.route('/add_user', methods=["POST", "GET"])
 def add_user():
     form = RegistrationForm()
@@ -119,6 +133,9 @@ class News(Resource):
         return jsonify({'success': 'OK'})
 
     def post(self, news_id):
+        if 'username' not in session:
+            return redirect('/login')
+
         abort_if_not_found(DBNews, news_id)
         form = AddComments(prefix="form1")
         form_van = AddVan(prefix="form2")
@@ -132,6 +149,7 @@ class News(Resource):
             return make_response(render_template("preview_news.html", news=DBNews.query.get(news_id), form=form,
                                  comments=Comments.query.filter_by(news_id=news_id).all(), form_van=form_van))
         elif form_van.submit.data:
+            post("http://localhost:8080/admin", json={"news_id": news_id, "choice": form_van.choice.data})
             return redirect('/news')
 
         return make_response(render_template("preview_news.html", news=DBNews.query.get(news_id), form=form),
@@ -166,17 +184,18 @@ class NewsList(Resource):
 
 class User(Resource):
     def get(self, user_id):
+        abort_if_not_found(DBUsers, user_id)
         user = DBUsers.query.get(user_id)
-        return make_response(render_template("preview_users.html", user=user))
-
-    def delete(self, user_id):
-        DBUsers.query.get(user_id).delete()
-        db.session.commit()
-        return jsonify({'success': 'OK'})
+        news = DBNews.query.filter_by(user_id=user_id).all()
+        return make_response(render_template("preview_users.html",
+                                             user=user, data=news, len=len(news)))
 
 
 class UserList(Resource):
     def get(self):
+        if 'username' not in session:
+            return redirect('/login')
+
         return make_response(render_template("users.html", data=DBUsers.query.all()))
 
     def post(self):
@@ -198,19 +217,32 @@ class UserList(Resource):
 
 
 class Van(Resource):
-    def get(self, van_id):
-        return
-
     def delete(self, van_id):
-        return
+        db.session.delete(DBVan.query.get(van_id))
+        db.session.commit()
+        return jsonify({'success': 'OK'})
 
 
 class VanList(Resource):
     def get(self):
-        return
+        if 'username' not in session:
+            return redirect('/login')
+
+        vans = DBVan.query.all()
+
+        return make_response(render_template("admin.html", data=vans, len=len(vans)))
 
     def post(self):
-        return
+        args = parser_2.parse_args()
+        news = DBNews.query.get(args["news_id"])
+
+        news.Users.append(DBVan(
+                choice=args["choice"]
+            ))
+
+        db.session.commit()
+
+        return True
 
 
 if __name__ == '__main__':
@@ -218,5 +250,7 @@ if __name__ == '__main__':
     api.add_resource(News, '/news/<int:news_id>')
     api.add_resource(UserList, '/users')
     api.add_resource(User, '/users/<int:user_id>')
+    api.add_resource(VanList, '/admin')
+    api.add_resource(Van, '/admin/<int:van_id>')
     app.register_error_handler(404, not_found)
     app.run(port=8080, host='127.0.0.1')

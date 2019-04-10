@@ -1,7 +1,7 @@
 {% extends "main.html" %}
 {% block content2 %}
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-
+<title>{{ user.name }} {{ user.surname }}</title>
 <div class="card">
 
     {% if session["username"] == user.username %}
@@ -10,9 +10,37 @@
     </div>
     {% endif %}
     <div class="card-body">
+        <label class="float-right">
+    <img src="/static/{{ user.image }}" width="300px" height="300px" style="border-radius: 300px;">
+        </label>
         <h3>{{ user.name }}  {{ user.surname }}</h3>
         <p>{{ user.email }}</p>
     </div>
 </div>
 
+{% if session["user_id"] != user.id %}
+<h3 style="margin: 20px">Написанные статьи</h3>
+
+{% for item in range(0, len, 3) %}
+<div class="card-deck">
+    {% for i in range(3) %}
+    {% if item + i < len %}
+    <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">{{data[item + i].title}}</h5>
+                <button type="button" class="ml-2 mb-1 close" href="/"></button>
+            </div>
+         <div class="card-body">
+            <p class="card-text">{{ data[item + i].text[:100] }}...</p>
+             <a role="button" class="btn btn-outline-success btn-lg" href="/news/{{data[item + i].id}}">Читать</a>
+        </div>
+        <div class="card-footer text-muted">
+            <small class="d-inline">Время добавления: {{ data[item + i].created_date }}</small>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+    {% endfor %}
+{% endif %}
 {% endblock %}
