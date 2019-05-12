@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileRequired, FileAllowed
 from wtforms import StringField, SubmitField, TextAreaField, PasswordField, FileField, SelectField, RadioField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 from DBManager import *
@@ -59,3 +60,14 @@ class AddVan(FlaskForm):
     choice = RadioField(choices=[("Неприемливый материал", "Неприемливый материал"), ("Неправда", "Неправда"),
                                  ("Просто автор не нравится", "Просто автор не нравится")])
     submit = SubmitField('Отправить запрос')
+
+
+class SearchForm(FlaskForm):
+    text = TextAreaField('', validators=[DataRequired()])
+    theme = SelectField('Тема', choices=[("Не важно", "Не важно"), ("Наука", "Наука"), ("Игры", "Игры"), ("Технологии", "Технологии")])
+    submit = SubmitField('Найти')
+
+
+class NewFoto(FlaskForm):
+    image = FileField('Новая фотография', validators=[])
+    submit = SubmitField('Изменить')

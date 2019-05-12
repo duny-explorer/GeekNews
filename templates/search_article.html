@@ -1,0 +1,26 @@
+{% extends "main.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block content2 %}
+{% if version == 1 %}
+<title>Поиск статей</title>
+<h3>Поиск статей</h3>
+<form action="" method="post" novalidate>
+    <div class="form-group">
+        {{ form. hidden_tag () }}
+        {{ wtf.quick_form(form) }}
+
+        {{  wtf.form_errors (form ,  hiddens = "only" )  }}
+    </div>
+</form>
+{% else %}
+<title>Изменения</title>
+<h3>Изменения</h3>
+<form method="post", enctype="multipart/form-data">
+                                <div class="form-group">
+        <input type="file" class="form-control-file" id="photo" name="file">
+                                    </div>
+    <button type="submit" class="btn btn-primary">Загрузить</button>
+                            </form>
+
+{% endif %}
+{% endblock %}

@@ -49,18 +49,19 @@
 <div class="card-deck">
     {% for i in range(3) %}
     {% if item + i < len %}
-    <div class="card">
-            <div class="card-header">
-                <h5 class="card-title">{{data[item + i].title}}</h5>
-                <button type="button" class="ml-2 mb-1 close" href="/"></button>
-            </div>
+    {% set  color = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'dark'] | random %}
+    <div class="card border-{{ color }} mb-3">
+        <div class="card-header">
+            <h5 class="card-title">{{data[item + i].title}}</h5>
+            <button type="button" class="ml-2 mb-1 close" href="/"></button>
+        </div>
          <div class="card-body">
             <p class="card-text">{{ data[item + i].text[:100] }}...</p>
-             <a role="button" class="btn btn-outline-success btn-lg" href="/news/{{data[item + i].id}}">Читать</a>
+             <a role="button" class="btn btn-outline-{{ color }} btn-lg" href="/news/{{data[item + i].id}}">Читать</a>
         </div>
         <div class="card-footer text-muted">
             <small class="d-inline">Время добавления: {{ data[item + i].created_date }}</small>
-            <a class="d-inline float-right" href="\users\{{ data[item + i].user.id }}">{{data[item + i].user.username}} <img style="border-radius: 50px;" src="/static/1.jpg" width="40" height="40"></a>
+            <a class="d-inline float-right" href="\users\{{ data[item + i].user.id }}">{{data[item + i].user.username}} <img style="border-radius: 50px;" src="/static/{{ data[item + i].user.image }}" width="40" height="40"></a>
         </div>
     </div>
     {% endif %}

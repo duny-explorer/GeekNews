@@ -1,13 +1,14 @@
 import datetime
-
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
+import flask_whooshalchemy as whooshalchemy
 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+WHOOSH_BASE = 'test.db'
 
 
 class DBUsers(db.Model):
@@ -25,6 +26,8 @@ class DBUsers(db.Model):
 
 
 class DBNews(db.Model):
+    __searchable__ = ['title', 'text']
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(80), unique=False, nullable=False)
     text = db.Column(db.String(500), unique=False, nullable=False)
@@ -59,3 +62,4 @@ class DBVan(db.Model):
 
 
 db.create_all()
+

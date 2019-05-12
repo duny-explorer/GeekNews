@@ -1,19 +1,25 @@
+import os
 import random
-
-import post as post
 from flask_restful import Api, Resource, reqparse
 from flask import jsonify, make_response, render_template, request, session
-from requests import delete, post
-from werkzeug.utils import redirect
+from requests import delete, post, put
+from werkzeug.utils import redirect, secure_filename
 from DBManager import *
 from forms import *
 from flask_bootstrap import Bootstrap
 
 
+"""
+pip install git+git://github.com/miguelgrinberg/flask-whooshalchemy.git ...?
+"""
+
+
 api = Api(app)
 bootstrap = Bootstrap(app)
+UPLOAD_FOLDER = '/static'
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 app.config['PROPAGATE_EXCEPTIONS'] = True
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 parser = reqparse.RequestParser()
 parser.add_argument('title', required=True)
@@ -24,6 +30,9 @@ parser.add_argument('theme', required=True)
 parser_2 = reqparse.RequestParser()
 parser_2.add_argument('news_id', required=True, type=int)
 parser_2.add_argument('choice', required=True)
+
+parser_3 = reqparse.RequestParser()
+parser_3.add_argument('foto', required=True)
 
 
 class Error404(Exception):
@@ -40,7 +49,7 @@ def not_found(error):
     return make_response(render_template("error404.html"), 404)
 
 
-def abort_if_not_found(data_base, item_id) :
+def abort_if_not_found(data_base, item_id):
     if not data_base.query.get(item_id):
         raise Error404
 
@@ -49,6 +58,18 @@ def abort_if_not_found(data_base, item_id) :
 def delete_news(news_id):
     delete('http://localhost:8080/news/{}'.format(news_id))
     return redirect("/news")
+
+
+@app.route('/search_article', methods=["POST", "GET"])
+def search_article():
+    form = SearchForm()
+    if request.method == "GET":
+        return render_template('search_article.html', form=form, article=False, version=1)
+    elif request.method == "POST":
+        if form.validate_on_submit():
+            print(form.text.data)
+            articles = DBNews.query.search(form.text.data).all()
+            print(articles)
 
 
 @app.route('/add_news', methods=["GET", "POST"])
@@ -103,6 +124,23 @@ def delete_van(van_id, news_id):
     return redirect('/admin')
 
 
+@app.route('/change_user', methods=["GET", "POST"])
+def change_user():
+    if request.method == "GET":
+        return render_template('search_article.html', article=False, version=0)
+    elif request.method == "POST":
+        file = request.files["file"]
+        if bool(file.filename):
+            filename = secure_filename("/static/" + file.filename)
+            file.save(filename)
+
+            put("http://localhost:8080/news/{}", json={'foto': filename})
+
+            return redirect('user/{}'.format(session['user_id']))
+
+        return render_template('search_article.html', article=False, version=0)
+
+
 @app.route('/add_user', methods=["POST", "GET"])
 def add_user():
     form = RegistrationForm()
@@ -147,7 +185,8 @@ class News(Resource):
 
             db.session.commit()
             return make_response(render_template("preview_news.html", news=DBNews.query.get(news_id), form=form,
-                                 comments=Comments.query.filter_by(news_id=news_id).all(), form_van=form_van))
+                                                 comments=Comments.query.filter_by(news_id=news_id).all(),
+                                                 form_van=form_van))
         elif form_van.submit.data:
             post("http://localhost:8080/admin", json={"news_id": news_id, "choice": form_van.choice.data})
             return redirect('/news')
@@ -163,11 +202,13 @@ class NewsList(Resource):
         global news
 
         news = DBNews.query.all()
-        science_news = random.choice(DBNews.query.filter_by(theme="Наука").all())
-        game_news = random.choice(DBNews.query.filter_by(theme="Игры").all())
-        technology_news = random.choice(DBNews.query.filter_by(theme="Технологии").all())
-        return make_response(render_template("news.html", data=news, len=len(news), science_news=science_news.id,
-                             game_news=game_news.id, technology_news=technology_news.id))
+        science_news = DBNews.query.filter_by(theme="Наука").all()
+        game_news = DBNews.query.filter_by(theme="Игры").all()
+        technology_news = DBNews.query.filter_by(theme="Технологии").all()
+        return make_response(render_template("news.html", data=news, len=len(news),
+                                             science_news=random.choice(science_news).id if science_news else 'no',
+                             game_news=random.choice(game_news).id if game_news else 'no',
+                             technology_news=random.choice(technology_news).id if technology_news else 'no'))
 
     def post(self):
         args = parser.parse_args()
@@ -189,6 +230,15 @@ class User(Resource):
         news = DBNews.query.filter_by(user_id=user_id).all()
         return make_response(render_template("preview_users.html",
                                              user=user, data=news, len=len(news)))
+
+    def put(self, user_id):
+        user = DBUsers.query.get(user_id)
+        args = parser_3.parse_args()
+        user.image = args["image"]
+
+        db.session.commit()
+
+        return True
 
 
 class UserList(Resource):

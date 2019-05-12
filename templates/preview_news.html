@@ -3,17 +3,22 @@
 {% block content2 %}
 <title>{{ news.title }}</title>
 <div class="card">
-    <div class="card-header">
-        <a role="button" class="close xl" aria-label="Close" href="/news"><span aria-hidden="true">&times;</span></a>
-        <h1>{{ news.title }}</h1>
-    </div>
-    <div class="card-body">
-        <p>{{ news.text }}</p>
-        {% if session["user_id"] == 1 %}
-        <a href="/delete_news/{{ news.id }}">Удалить</a>
-        {% else %}
-        <button type="button" class="btn btn-outline-success btn-lg" data-toggle="modal" data-target="#exampleModalCenter">Бан</button>
-        {% endif %}
+    <div class="media mt-3">
+        <a class="d-flex flex-column" href="/users/{{ news.user_id }}">
+            <img  style="border-radius: 50px;" width="80" height="80" src="/static/{{ news.user.image }}" class="align-self-start mr-3"/>
+            <p class="align-self-center mr-3">{{ news.user.username }}</p>
+        </a>
+
+        <div class="media-body">
+            <a role="button" class="close xl" aria-label="Close" href="/news"><span aria-hidden="true">&times;</span></a>
+            <h5 class="mt-0">{{ news.title }}</h5>
+            <p>{{news.text}}</p>
+            {% if session["user_id"] == 1 or session["user_id"] == news.user_id%}
+            <a href="/delete_news/{{ news.id }}">Удалить</a>
+            {% else %}
+            <button type="button" class="btn btn-outline-success btn-lg" data-toggle="modal" data-target="#exampleModalCenter">Бан</button>
+            {% endif %}
+        </div>
     </div>
 </div>
 
@@ -36,19 +41,23 @@
 
 <table class="table table-hover">
     {% for i in comments %}
-    <tr style="background_color: grey">
-        <td width="70px">
+    <td>
+        <div class="media">
             <a href="/users/{{ i.user_id }}">
-                <img  style="border-radius: 50px;" width="40" height="40" src="/static/1.jpg" />
+                <img  style="border-radius: 50px;" width="40" height="40" src="/static/{{ i.user.image }}" class="mr-3"/>
             </a>
-        </td>
-        <td>
-            <a href="/users/{{ i.user_id }}">
-                {{ i.user.username }}
-            </a>
-            <p>{{ i.text }}</p>
-            <smal>{{ i.created_date }}</smal>
-        </td>
+            <div class="media-body">
+                {% if session["user_id"] == 1 or session["user_id"] == news.user_id%}
+                <a role="button" class="close xl" aria-label="Close" data-toggle="tooltip" data-html="true" title="Удалить" href="/delete_com/{{i.id}}"><span aria-hidden="true">&times;</span></a>
+                {% endif %}
+               <h5 class="mt-0">{{ i.user.username }}</h5>
+                <p>{{ i.text }}</p>
+                <smal>{{ i.created_date }}</smal>
+
+            </div>
+        </div>
+    </td>
+
     </tr>
     {% endfor %}
 </table>
@@ -60,6 +69,6 @@
 
         {{  wtf.form_errors (form ,  hiddens = "only" )  }}
     </div>
-    </form>
+</form>
 
 {% endblock %}

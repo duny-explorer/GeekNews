@@ -16,6 +16,9 @@
         <h3>{{ user.name }}  {{ user.surname }}</h3>
         <p>{{ user.email }}</p>
     </div>
+    {% if session["username"] == user.username %}
+        <a role="button" class="btn btn-outline-{{ color }} btn-lg" href="/change_user">Изменить</a>
+    {% endif %}
 </div>
 
 {% if session["user_id"] != user.id %}
@@ -25,14 +28,15 @@
 <div class="card-deck">
     {% for i in range(3) %}
     {% if item + i < len %}
-    <div class="card">
+    {% set  color = ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'dark'] | random %}
+    <div class="card border-{{ color }} mb-3">
             <div class="card-header">
                 <h5 class="card-title">{{data[item + i].title}}</h5>
                 <button type="button" class="ml-2 mb-1 close" href="/"></button>
             </div>
          <div class="card-body">
             <p class="card-text">{{ data[item + i].text[:100] }}...</p>
-             <a role="button" class="btn btn-outline-success btn-lg" href="/news/{{data[item + i].id}}">Читать</a>
+             <a role="button" class="btn btn-outline-{{ color }} btn-lg" href="/news/{{data[item + i].id}}">Читать</a>
         </div>
         <div class="card-footer text-muted">
             <small class="d-inline">Время добавления: {{ data[item + i].created_date }}</small>
