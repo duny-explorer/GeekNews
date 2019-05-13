@@ -11,6 +11,11 @@ from flask_bootstrap import Bootstrap
 
 """
 pip install git+git://github.com/miguelgrinberg/flask-whooshalchemy.git ...?
+изменение аватара и поиск по статьям не доделаны, но оформлены
+Администратор: duny, admin - пароль
+Другие пользователи:
+igor_cat - iloveyou
+maximum_positiv - 1234567
 """
 
 
